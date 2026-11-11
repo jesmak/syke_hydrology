@@ -11,11 +11,15 @@ import logging
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.event import async_call_later
+from homeassistant.helpers.typing import ConfigType
 
-from . import long_term
+from . import long_term, websocket
 from .api import SykeError
+from .card import async_add_card_resource, async_remove_card_resource, async_serve_card
+from .const import DOMAIN
 from .coordinator import SykeConfigEntry, SykeCoordinator
 from .history import WRITE_AGAIN_AFTER, async_write_history
 from .sensor import entity_keys, history_of
@@ -23,6 +27,15 @@ from .sensor import entity_keys, history_of
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Serves the card and answers what it asks, for every station."""
+    await async_serve_card(hass)
+    websocket.async_register(hass)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: SykeConfigEntry) -> bool:
@@ -42,6 +55,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: SykeConfigEntry) -> bool
             registry.async_remove(entity.entity_id)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # Once a start, not once a station, so a resource set in YAML is warned about once. Marked only once it is done,
+    # so a station set up after a failure tries again.
+    if not hass.data.setdefault(DOMAIN, {}).get("card_resource"):
+        await async_add_card_resource(hass)
+        hass.data[DOMAIN]["card_resource"] = True
 
     again: CALLBACK_TYPE | None = None
 
@@ -86,6 +104,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: SykeConfigEntry) -> bool
 
 async def async_remove_entry(hass: HomeAssistant, entry: SykeConfigEntry) -> None:
     await long_term.async_remove(hass, entry)
+    # The card goes with the last station.
+    if not [other for other in hass.config_entries.async_entries(DOMAIN) if other.entry_id != entry.entry_id]:
+        await async_remove_card_resource(hass)
+        # A station added again before a restart adds it back.
+        hass.data.get(DOMAIN, {}).pop("card_resource", None)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: SykeConfigEntry) -> bool:

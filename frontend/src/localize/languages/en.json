@@ -1,0 +1,91 @@
+{
+    "common": {
+        "name": "SYKE hydrology",
+        "description": "A station's measurement against its long-term average, or the station's ice"
+    },
+    "card": {
+        "today": "today",
+        "average_short": "avg.",
+        "measured": "measured {day}",
+        "legend_measured": "Measured",
+        "legend_average": "Avg. {years}",
+        "legend_average_plain": "Avg.",
+        "difference_axis": "Difference from the average, {unit}, 90 days",
+        "later": "Avg. {value} in {days} days",
+        "at_average": "at the average",
+        "above": "{value} above avg.",
+        "below": "{value} below avg.",
+        "change": "Avg. {value} in {days} days"
+    },
+    "ice": {
+        "title": "Ice",
+        "winter": "Ice · winter {winter}",
+        "dates_only": "Freeze-up and break-up",
+        "no_ice": "No ice",
+        "last": "Ice last measured {day}",
+        "never": "No ice measurements",
+        "class": {
+            "does_not_bear": "Doesn't bear",
+            "walking": "Bears a person walking",
+            "snowmobile": "Bears a snowmobile",
+            "car": "Bears a car"
+        },
+        "bearing": "{value} cm of bearing ice",
+        "weak": "Weak ice, too weak to measure",
+        "weak_short": "weak ice",
+        "days_ago": "{days} days ago",
+        "measured_today": "today",
+        "total": "ice {value} cm",
+        "snow_on_ice": "Snow {value} cm",
+        "snow_ice": "Snow ice {value}",
+        "clear_ice": "Clear ice {value}",
+        "total_long": "Ice in all {value} cm",
+        "old": "The measurement is over {days} days old. The ice may have weakened since.",
+        "legend_bearing": "Bearing",
+        "legend_thawed": "Thawed",
+        "froze": "Froze",
+        "freezes": "Freezes",
+        "thawed": "Ice went",
+        "thaws": "Ice goes",
+        "last_winter": "Last winter",
+        "on_average_day": "on average {day}, {when}",
+        "in_days": "in {days} days",
+        "later_than_average": "{days} days later than on average",
+        "earlier_than_average": "{days} days earlier than on average",
+        "late": "{days} days late",
+        "early": "{days} days early",
+        "last_winter_froze": "froze {day}",
+        "last_winter_thawed": "ice went {day}",
+        "freezes_short": "freezes avg. {day}"
+    },
+    "error": {
+        "invalid_configuration": "Choose a sensor of SYKE hydrology",
+        "invalid_chart": "The chart is average or difference",
+        "invalid_height": "The height mode is auto, fixed or max, and the heights are in pixels",
+        "invalid_row_step": "The row step is full or half",
+        "entity_not_found": "Sensor {entity} was not found",
+        "not_supported": "The card doesn't draw {entity}",
+        "fetch_failed": "Couldn't get the data. Trying again in a minute."
+    },
+    "editor": {
+        "entity": "Sensor",
+        "entity_helper": "A measurement's sensor or its average, or any of the station's ice sensors",
+        "chart": "Chart",
+        "chart_helper": "Not used for the ice, which is always drawn as the winter",
+        "chart_average": "Against the average year",
+        "chart_difference": "Difference from the average",
+        "row_step": "Height rounding",
+        "row_step_helper": "On automatic rows the card rounds its height to whole or half rows",
+        "row_step_full": "Whole rows",
+        "row_step_half": "Half rows"
+    },
+    "tooltip": {
+        "chart": "Chart. The arrow keys move the day, Escape closes.",
+        "measured": "Measured {value}",
+        "average": "Average {value}",
+        "difference": "Difference from the average {value}",
+        "bearing": "Bearing thickness {value} cm",
+        "average_bearing": "Average {value} cm",
+        "last_winter": "Last winter {day}"
+    }
+}

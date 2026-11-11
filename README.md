@@ -1,15 +1,15 @@
 # SYKE hydrology for Home Assistant
 
 Home Assistant integration for the lake and river measurements of the Finnish Environment Institute (Syke). It
-follows water level, discharge, water temperature, ice, snow and precipitation, each with its long-term average.
+follows water level, discharge, water temperature, ice, snow and precipitation, each with its long-term average, and
+comes with a dashboard card that draws them.
 
 [![GitHub Release][releases-shield]][releases] [![GitHub Release Date][release-date-shield]][releases] [![Downloads][downloads-shield]][releases] [![Marketplace][marketplace-shield]][marketplace] [![License][license-shield]](LICENSE)
 
-<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/dashboard-light.png#gh-light-mode-only" width="1000" alt="A dashboard of a lake in late March. Four charts show the ice thickness with its bearing thickness, the snow water equivalent, the water level and the surface water temperature, each against a dashed long-term average that continues two months ahead. The ice chart marks the freeze-up, the average freeze-up and the average break-up. Tiles tell that the ice bears a car, when it was measured, the freeze-up date and the average break-up date">
-<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/dashboard-dark.png#gh-dark-mode-only" width="1000" alt="A dashboard of a lake in late March. Four charts show the ice thickness with its bearing thickness, the snow water equivalent, the water level and the surface water temperature, each against a dashed long-term average that continues two months ahead. The ice chart marks the freeze-up, the average freeze-up and the average break-up. Tiles tell that the ice bears a car, when it was measured, the freeze-up date and the average break-up date">
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/dashboard-light.png#gh-light-mode-only" width="1000" alt="A dashboard of a lake in late March, drawn with the integration's card. The ice card shows the winter's bearing thickness at each measurement against the walking, snowmobile and car limits and a dashed long-term average, with the freeze-up and the average freeze-up and break-up, and tells that the ice bears a car. The snow course, water level and surface water temperature cards each show the past three months against a dashed long-term average that continues two months ahead, with the difference from the average beside the newest value">
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/dashboard-dark.png#gh-dark-mode-only" width="1000" alt="A dashboard of a lake in late March, drawn with the integration's card. The ice card shows the winter's bearing thickness at each measurement against the walking, snowmobile and car limits and a dashed long-term average, with the freeze-up and the average freeze-up and break-up, and tells that the ice bears a car. The snow course, water level and surface water temperature cards each show the past three months against a dashed long-term average that continues two months ahead, with the difference from the average beside the newest value">
 
-The data in the picture is made up. The charts are drawn with
-[apexcharts-card](https://github.com/RomRider/apexcharts-card), see [Examples](#examples).
+The data in the picture is made up. The cards are the integration's own, see [Hydrology card](#hydrology-card).
 
 ## What is it?
 
@@ -28,6 +28,10 @@ For an ice station the integration works out how much the ice bears, as a thickn
 a snowmobile, a car), with limits you can change.
 
 Sensors get the past year written into their statistics, so charts have a history from the start.
+
+The [hydrology card](#hydrology-card) that comes with the integration draws one measurement against its normal year.
+For a station's ice it tells what the ice bears and how old the measurement is, and draws the winter against the
+average one.
 
 ## Installation
 
@@ -162,90 +166,147 @@ gets an average when at least five of the years have a measurement for it, and a
 
 When a measurement is added, the past year is written into its sensors' statistics, the average sensors included, each
 measurement at its own date. Every later measurement is written at its own date as well, whenever Syke publishes it.
-Charts that read statistics, such as the ones below, therefore work from the first day.
+Charts that read statistics, such as [apexcharts-card](https://github.com/RomRider/apexcharts-card)'s, therefore work from
+the first day.
+
+## Hydrology card
+
+<p>
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-measurement-light.png#gh-light-mode-only" width="400" alt="A lake's water level card. The newest value, 81.74 m, 8 cm below the average, and a chart of the past three months against a dashed long-term average that continues two months ahead, with today marked">
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-measurement-dark.png#gh-dark-mode-only" width="400" alt="A lake's water level card. The newest value, 81.74 m, 8 cm below the average, and a chart of the past three months against a dashed long-term average that continues two months ahead, with today marked">
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-ice-light.png#gh-light-mode-only" width="400" alt="A lake's ice card in March. 39 cm of bearing ice, which bears a car, measured four days ago. The winter's measurements against the walking, snowmobile and car limits and a dashed average, with the freeze-up six days later than on average and the average break-up 38 days away">
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-ice-dark.png#gh-dark-mode-only" width="400" alt="A lake's ice card in March. 39 cm of bearing ice, which bears a car, measured four days ago. The winter's measurements against the walking, snowmobile and car limits and a dashed average, with the freeze-up six days later than on average and the average break-up 38 days away">
+</p>
+
+The integration comes with a dashboard card for one of a station's sensors. A measurement is drawn against its normal
+year, the station's long-term average, 90 days back and 60 ahead. Any of a station's ice sensors draws the ice instead:
+what it bears, how thick it is, how old the measurement is, and the winter so far against the average one.
+
+The card asks the integration for the measurements and the averages, so it doesn't depend on what the recorder has
+kept. A station with several measurements gets a card for each, which can sit in different sections.
+
+The integration serves the card itself and adds it to the dashboards' resources when it starts, so the card is always
+the integration's own version. With the resources set in YAML (`resource_mode: yaml`), it can't add or update itself,
+and the log says which line to add, change or remove.
+
+### Card options
+
+The card has a visual editor. Add **SYKE hydrology** from the card picker and choose a sensor. The options can also be
+written by hand, and `height_mode`, `height` and `max_height` only by hand. In a sections view the layout tab sets the
+card's height. They are for where there is no layout tab, such as a masonry or panel view, or a stack or other card the
+card is inside, even in a sections view.
+
+| Name          | Type   | Description                                                                                                                                                                                                                                                                                                                | Default                                                                         |
+| ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `type`        | string | `custom:syke-hydrology-card`                                                                                                                                                                                                                                                                                               | required                                                                        |
+| `entity`      | string | A measurement sensor, or its long-term average, for the measurement. Any of a station's ice sensors, its ice bearing, freeze-up and break-up dates included, for the ice                                                                                                                                                   | required                                                                        |
+| `chart`       | string | How a measurement is drawn. `average` against its long-term average, `difference` as its difference from the average. Not used for the ice                                                                                                                                                                                 | `average`                                                                       |
+| `height_mode` | string | How tall the card is. `auto` fits its content, `fixed` keeps it at `height`, `max` lets it grow up to `max_height`. Held lower than its content, the card [draws less](#sizes). A height in grid rows, set in the layout tab of a sections view, is used instead                                                           | `fixed` when `height` is set, `max` when only `max_height` is, otherwise `auto` |
+| `height`      | number | The card's height in pixels, for `fixed`                                                                                                                                                                                                                                                                                   |                                                                                 |
+| `max_height`  | number | The card's greatest height in pixels, for `max`                                                                                                                                                                                                                                                                            |                                                                                 |
+| `row_step`    | string | How the card rounds its height on automatic rows in a sections view, with `height_mode` `auto` or `max`. `full` rounds it up to whole rows, so the cards under it stay on the rows. `half` rounds it up to half rows, which saves space but can leave the cards under it half a row off the rows of the sections beside it | `full`                                                                          |
+
+### A measurement
+
+The newest value is at the top, with its difference from the day's average. The chart shows the measurement for 90 days
+back, a dot on the newest, and the average for 90 days back and 60 ahead, the days ahead shaded. Under it, the average's
+years and where the average goes in the coming two months. A water level in metres differs from its average by
+centimetres, so the difference is in centimetres.
+
+A gap of up to a month in the average, such as between the days a snow course is measured on, is drawn across. A longer
+one stays a gap, such as a surface temperature's under the ice. A measurement out of season, such as a snow course in
+summer, shows when it was last measured.
+
+With `chart: difference` the chart shows the difference from the average on each of the 90 days instead:
+
+<p>
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-difference-light.png#gh-light-mode-only" width="440" alt="The water level's difference from its average on each of the past 90 days, as bars below zero, between 5 and 10 cm below">
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-difference-dark.png#gh-dark-mode-only" width="440" alt="The water level's difference from its average on each of the past 90 days, as bars below zero, between 5 and 10 cm below">
+</p>
+
+### The ice
+
+The header tells the bearing thickness, what it bears and how old the measurement is. The chart runs from November to
+the middle of May. Each measurement's bearing thickness is a dot in the colour of what it bears, against the station's
+walking, snowmobile and car limits and the average bearing thickness. The freeze-up and the break-up are solid lines,
+their averages dashed. Under the chart, the freeze-up and the break-up against their averages, or the average day of
+the one still to come.
+
+Before the winter's first measurement, the chart shows last winter's measurements as a faint dotted line to compare
+with, and the card says there is no ice, when the ice was last measured, and when the lake freezes on average. A
+measurement older than the station's limit is marked, and the card says the ice may have weakened since.
+
+A station that only records the freeze-up and break-up dates gets the dates and their averages.
+
+### Pointing at a chart
+
+Pointing at a chart, or tapping it, puts a line on the day and shows its values beside it. For a measurement they are
+the measurement, the average and their difference. The ice chart shows the nearest measurement within five days, what it
+bore and the average. The arrow keys move the day, on the ice chart from one measurement to the next, and Escape closes
+it.
+
+### Sizes
+
+In a sections view the card is the section's full width by default, and can be made as narrow as 6 columns. On
+automatic rows it ends on whole rows, or on half rows with `row_step: half`, and the chart takes the room left over.
+
+Held lower than its content needs, by rows set in the layout tab or by `height_mode`, the card draws less instead of
+cutting anything off. The chart shrinks first, down to 90 px, then the legend under it goes. Lower still, a measurement
+becomes its value on one row, with the past and coming weeks under it in two rows. The ice becomes what it bears, with a
+gauge of its thickness against the limits, and on one row what it bears and the measurement's age. A card without a
+title is centred in the room it has. The card fits one row at its smallest.
+
+<p>
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-rows-light.png#gh-light-mode-only" width="500" alt="Three cards held low. The surface water temperature on one row, the water level on two rows with its past and coming weeks under the value, and the ice on three rows, bearing a car, with a gauge of its 39 cm against the limits and the average">
+<img src="https://raw.githubusercontent.com/jesmak/syke_hydrology/main/docs/images/hydrology-rows-dark.png#gh-dark-mode-only" width="500" alt="Three cards held low. The surface water temperature on one row, the water level on two rows with its past and coming weeks under the value, and the ice on three rows, bearing a car, with a gauge of its 39 cm against the limits and the average">
+</p>
 
 ## Examples
 
-The charts in the picture are [apexcharts-card](https://github.com/RomRider/apexcharts-card) cards that read the
-sensors' statistics. This one shows the water level for 90 days back and 60 ahead with its long-term average:
+The dashboard in the picture is a sections view of two sections, with a card for each sensor:
 
 ```yaml
-type: custom:apexcharts-card
-graph_span: 150d
-span:
-    offset: +60d
-header:
-    show: true
-    title: Water level
-    show_states: true
-    colorize_states: true
-all_series_config:
-    curve: straight
-    stroke_width: 1
-    float_precision: 2
-    statistics:
-        type: mean
-        period: day
-        align: middle
-apex_config:
-    legend:
-        show: false
-series:
-    - entity: sensor.koivujarvi_water_level
-      name: Latest
-      color: orange
-      extend_to: now
-    - entity: sensor.koivujarvi_water_level_long_term_average
-      name: Long-term average
-      color: "#3498db"
-      stroke_dash: 5
-      extend_to: now
-    - entity: sensor.koivujarvi_water_level_long_term_average
-      name: Long-term average, ahead
-      color: "#3498db"
-      stroke_dash: 5
-      offset: -365d
-      extend_to: false
-      show:
-          in_header: false
-          offset_in_name: false
+type: sections
+max_columns: 2
+sections:
+  - type: grid
+    cards:
+      - type: custom:syke-hydrology-card
+        entity: sensor.koivujarvi_ice_bears
+      - type: custom:syke-hydrology-card
+        entity: sensor.honkavaara_snow_water_equivalent
+  - type: grid
+    cards:
+      - type: custom:syke-hydrology-card
+        entity: sensor.koivujarvi_water_level
+      - type: custom:syke-hydrology-card
+        entity: sensor.koivujarvi_surface_water_temperature
 ```
 
-The line ahead is the third series. A calendar day's average is the same every year, so the average of a year ago,
-moved a year forward with `offset`, is the average of the days to come. `extend_to: now` keeps the card from drawing
-the newest value flat to the chart's right edge.
-
-A freeze-up or break-up date can be drawn on a chart as a vertical line. The card evaluates the expression when it
-loads, so a new date shows after the page is reloaded:
+The water level's difference from its average, held to four rows of a sections view:
 
 ```yaml
-apex_config:
-    annotations:
-        xaxis:
-            - x: "EVAL:Date.parse((document.querySelector('home-assistant').hass.states['sensor.koivujarvi_freeze_up'] || {}).state + 'T00:00:00') || 0"
-              borderColor: "#00acc1"
-              label:
-                  text: Freeze-up
-                  orientation: vertical
-                  style:
-                      color: white
-                      background: "#00acc1cc"
+type: custom:syke-hydrology-card
+entity: sensor.koivujarvi_water_level
+chart: difference
+grid_options:
+  rows: 4
 ```
 
 An automation that tells when the ice first bears a walker:
 
 ```yaml
 triggers:
-    - trigger: state
-      entity_id: sensor.koivujarvi_ice_bears
-      from: does_not_bear
-      to: walking
+  - trigger: state
+    entity_id: sensor.koivujarvi_ice_bears
+    from: does_not_bear
+    to: walking
 actions:
-    - action: notify.notify
-      data:
-          message: >-
-              The ice at Koivujärvi bears a person walking,
-              {{ states('sensor.koivujarvi_ice_bearing_thickness') }} cm of bearing ice.
+  - action: notify.notify
+    data:
+      message: >-
+        The ice at Koivujärvi bears a person walking,
+        {{ states('sensor.koivujarvi_ice_bearing_thickness') }} cm of bearing ice.
 ```
 
 ## Data
@@ -263,6 +324,9 @@ icon is Syke's logo, which belongs to Syke and is used only to show where the da
 The texts are in English and Finnish. A translation into another language is welcome as a pull request. Copy
 `custom_components/syke_hydrology/translations/en.json` under the language's code and translate the values.
 
+The hydrology card's texts are in `frontend/src/localize/languages/`, in the same way. The card finds a new file by
+itself and uses it when Home Assistant is set to that language. A text left out falls back to English.
+
 ## Development
 
 Requires Python 3.14.
@@ -273,6 +337,19 @@ python3.14 -m venv .venv
 .venv/bin/pytest
 .venv/bin/ruff check .
 ```
+
+The hydrology card is in `frontend/` and requires Node 22.13 or newer:
+
+```
+cd frontend
+npm install
+npm run check
+```
+
+`npm run check` typechecks, lints, checks formatting, runs the tests and builds
+`custom_components/syke_hydrology/www/syke-hydrology-card.js`, which is the file the integration serves and is committed
+to the repository. The card carries the integration's version from `manifest.json`. To have git refuse a commit whose
+built card doesn't match `frontend/`, run `git config core.hooksPath .githooks` once.
 
 | Path                            | What it contains                                                     |
 | ------------------------------- | -------------------------------------------------------------------- |
@@ -287,7 +364,10 @@ python3.14 -m venv .venv
 | `history.py`                    | Writing the measurements into long-term statistics                   |
 | `entity.py`                     | The station's device                                                 |
 | `sensor.py`, `binary_sensor.py` | The sensors                                                          |
+| `card.py`                       | Serving the card and keeping its dashboard resource                  |
+| `websocket.py`                  | The command the card asks a sensor's measurements and averages with  |
 | `translations/<language>.json`  | Home Assistant UI texts                                              |
+| `frontend/src/`                 | The card: its forms, charts, data, editor and texts                  |
 
 The README's screenshots come from made-up data, written by `docs/screenshots.py` into `docs/screenshots.json`.
 

@@ -1,0 +1,91 @@
+{
+    "common": {
+        "name": "SYKE-hydrologia",
+        "description": "Aseman mittaus pitkän aikavälin keskiarvoa vasten, tai aseman jäätilanne"
+    },
+    "card": {
+        "today": "tänään",
+        "average_short": "ka.",
+        "measured": "mitattu {day}",
+        "legend_measured": "Mitattu",
+        "legend_average": "Ka. {years}",
+        "legend_average_plain": "Ka.",
+        "difference_axis": "Ero keskiarvoon, {unit}, 90 vrk",
+        "later": "Ka. {value} {days} vrk:n päästä",
+        "at_average": "keskiarvossa",
+        "above": "{value} yli ka.",
+        "below": "{value} alle ka.",
+        "change": "Ka. {value} {days} vrk:ssa"
+    },
+    "ice": {
+        "title": "Jää",
+        "winter": "Jää · talvi {winter}",
+        "dates_only": "Jäätyminen ja jäänlähtö",
+        "no_ice": "Ei jäätä",
+        "last": "Jää mitattiin viimeksi {day}",
+        "never": "Ei jäämittauksia",
+        "class": {
+            "does_not_bear": "Ei kanna",
+            "walking": "Kantaa jalankulkijan",
+            "snowmobile": "Kantaa moottorikelkan",
+            "car": "Kantaa auton"
+        },
+        "bearing": "{value} cm kantavaa jäätä",
+        "weak": "Heikkoa jäätä, liian heikkoa mitattavaksi",
+        "weak_short": "heikkoa jäätä",
+        "days_ago": "{days} vrk sitten",
+        "measured_today": "tänään",
+        "total": "jää {value} cm",
+        "snow_on_ice": "Lunta {value} cm",
+        "snow_ice": "Kohvaa {value}",
+        "clear_ice": "Teräsjäätä {value}",
+        "total_long": "Jää yht. {value} cm",
+        "old": "Mittaus on yli {days} vrk vanha. Jää on voinut heiketä sen jälkeen.",
+        "legend_bearing": "Kantavuus",
+        "legend_thawed": "Suli",
+        "froze": "Jäätyi",
+        "freezes": "Jäätyy",
+        "thawed": "Jäät lähtivät",
+        "thaws": "Jäät lähtevät",
+        "last_winter": "Viime talvi",
+        "on_average_day": "keskimäärin {day}, {when}",
+        "in_days": "{days} vrk päästä",
+        "later_than_average": "{days} vrk keskimääräistä myöhemmin",
+        "earlier_than_average": "{days} vrk keskimääräistä aiemmin",
+        "late": "{days} vrk myöhässä",
+        "early": "{days} vrk etuajassa",
+        "last_winter_froze": "jäätyi {day}",
+        "last_winter_thawed": "jäät lähtivät {day}",
+        "freezes_short": "jäätyy ka. {day}"
+    },
+    "error": {
+        "invalid_configuration": "Valitse SYKE-hydrologian anturi",
+        "invalid_chart": "Kaavio on average tai difference",
+        "invalid_height": "Korkeus on auto, fixed tai max, ja korkeudet pikseleinä",
+        "invalid_row_step": "Rivien pyöristys on full tai half",
+        "entity_not_found": "Anturia {entity} ei löydy",
+        "not_supported": "Kortti ei piirrä anturia {entity}",
+        "fetch_failed": "Tietoja ei saatu. Yritetään uudelleen minuutin päästä."
+    },
+    "editor": {
+        "entity": "Anturi",
+        "entity_helper": "Mittauksen anturi tai sen keskiarvo, tai jokin aseman jääantureista",
+        "chart": "Kaavio",
+        "chart_helper": "Jäätä ei piirretä näin, se on aina talven käyrä",
+        "chart_average": "Keskiarvokäyrä",
+        "chart_difference": "Ero keskiarvoon",
+        "row_step": "Korkeuden pyöristys",
+        "row_step_helper": "Automaattisilla riveillä kortti pyöristää korkeutensa kokonaisiin tai puoliin riveihin",
+        "row_step_full": "Kokonaiset rivit",
+        "row_step_half": "Puolikkaat rivit"
+    },
+    "tooltip": {
+        "chart": "Kaavio. Nuolinäppäimet siirtävät päivää, Esc sulkee.",
+        "measured": "Mitattu {value}",
+        "average": "Keskiarvo {value}",
+        "difference": "Ero keskiarvoon {value}",
+        "bearing": "Kantava paksuus {value} cm",
+        "average_bearing": "Keskiarvo {value} cm",
+        "last_winter": "Viime talvi {day}"
+    }
+}

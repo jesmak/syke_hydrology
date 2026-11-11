@@ -20,9 +20,8 @@ SNOW_COURSE = "sensor.honkavaara"
 ATTRIBUTION = "Hydrologiarajapinta / Source: Finnish Environment Institute (Syke), CC BY 4.0"
 YEARS = "1997–2026"
 
-# The charts show 90 days back and 60 ahead, and the line ahead is the average of a year ago.
-PAST = 90
-AHEAD = 60
+# The card draws a measurement 90 days back. The integration keeps a year of them.
+PAST = 366
 
 FREEZE_UP = date(2027, 1, 5)
 FREEZE_UP_AVERAGE = date(2026, 12, 30)
@@ -127,243 +126,166 @@ def drift(count: int, step: float) -> list[float]:
     return out
 
 
-def held(measurements: list[tuple[date, float]], last: date) -> list[list]:
-    """Each measurement from its own day until the next one, as the sensor shows it."""
-    rows = []
-    for index, (day, value) in enumerate(measurements):
-        until = measurements[index + 1][0] - timedelta(days=1) if index + 1 < len(measurements) else last
-        rows += [[midnight(each), value] for each in days(day, until)]
-    return rows
+def iso(day: date) -> str:
+    return day.isoformat()
 
 
-def average_rows(average) -> list[list]:
-    """A year more than the chart's past, as the line ahead reads the average of a year ago."""
-    return [[midnight(day), average(day)] for day in days(TODAY - timedelta(days=PAST + 366), TODAY) if average(day) is not None]
+def calendar(average) -> dict[str, float]:
+    """The average of every calendar day, as the integration keeps them. 29 February, which the made-up winter lacks, is the 28th's."""
+    leap = days(date(2028, 1, 1), date(2028, 12, 31))
+    same = [day - timedelta(days=1) if (day.month, day.day) == (2, 29) else day for day in leap]
+    return {day.strftime("%m-%d"): value for day, other in zip(leap, same, strict=True) if (value := average(other)) is not None}
 
 
 def sensor(state, name: str, **attributes) -> dict:
-    return {"state": str(state), "attributes": {"friendly_name": f"Koivujärvi {name}", "attribution": ATTRIBUTION, **attributes}}
-
-
-def chart(title: str, series: list[dict], yaxis: dict, annotations: dict) -> dict:
-    return {
-        "type": "custom:apexcharts-card",
-        "graph_span": f"{PAST + AHEAD}d",
-        "span": {"offset": f"+{AHEAD}d"},
-        "header": {"show": True, "title": title, "show_states": True, "colorize_states": True},
-        "all_series_config": {"curve": "straight", "statistics": {"type": "mean", "period": "day", "align": "middle"}},
-        "apex_config": {
-            "chart": {"height": "170px"},
-            "legend": {"show": False},
-            "xaxis": {"tickAmount": 7},
-            "annotations": annotations,
-        },
-        "series": series,
-        "yaxis": [yaxis],
-    }
-
-
-def measured(entity: str, name: str, color: str, precision: int, width: int = 1) -> dict:
-    return {"entity": entity, "name": name, "color": color, "stroke_width": width, "float_precision": precision, "extend_to": "now"}
-
-
-def average(entity: str, name: str, color: str, precision: int, width: int = 1) -> list[dict]:
-    """The average until today, and the same sensor a year back as the line ahead."""
-    line = {"entity": entity, "color": color, "stroke_width": width, "stroke_dash": 5, "float_precision": precision}
-    return [
-        {**line, "name": name, "extend_to": "now"},
-        {**line, "name": f"{name}, ahead", "offset": "-365d", "extend_to": False, "show": {"in_header": False, "offset_in_name": False}},
-    ]
-
-
-def event_line(entity: str, text: str, color: str, dashed: bool) -> dict:
-    return {
-        "x": f"EVAL:Date.parse((document.querySelector('home-assistant').hass.states['{entity}'] || {{}}).state + 'T00:00:00') || 0",
-        "borderColor": color,
-        "strokeDashArray": 4 if dashed else 0,
-        "label": {"text": text, "orientation": "vertical", "style": {"color": "white", "background": f"{color}{'80' if dashed else 'cc'}"}},
-    }
-
-
-TODAY_LINE = {"x": "EVAL:Date.now()", "borderColor": "#9e9e9e", "strokeDashArray": 2}
-
-
-def axis(low: float, high: float | str, ticks: int, decimals: int, unit: str) -> dict:
-    formatter = f"EVAL:function(value) {{ return value.toFixed({decimals}) + ' {unit}'; }}"
-    return {"min": low, "max": high, "apex_config": {"tickAmount": ticks, "labels": {"formatter": formatter}}}
-
-
-def tile(entity: str, name: str, icon: str, color: str) -> dict:
-    return {"type": "tile", "entity": entity, "name": name, "icon": icon, "color": color}
+    return {"state": str(state), "attributes": {"friendly_name": name, "attribution": ATTRIBUTION, **attributes}}
 
 
 past = days(TODAY - timedelta(days=PAST), TODAY - timedelta(days=1))
 level_drift = drift(len(past), 0.004)
-levels = [[midnight(day), round(level_average(day) - 0.07 + offset, 2)] for day, offset in zip(past, level_drift, strict=True)]
-temperatures = [[midnight(day), round(max(0.0, 0.2 + random.gauss(0, 0.06)), 1)] for day in past]
-thickness = held([(day, clear + snow_ice) for day, clear, snow_ice in ICE], TODAY)
-bearing = held([(day, math.floor(clear + snow_ice / 2 + 0.5)) for day, clear, snow_ice in ICE], TODAY)
-snow = held(SNOW, TODAY)
-measured_day = ICE[-1][0].isoformat()
-yesterday = past[-1].isoformat()
+levels = [[iso(day), round(level_average(day) - 0.07 + offset, 2)] for day, offset in zip(past, level_drift, strict=True)]
+temperatures = [[iso(day), round(max(0.0, 0.2 + random.gauss(0, 0.06)), 1)] for day in past]
+# Snow on the ice, in cm, at each ice measurement.
+SNOW_ON_ICE = [8, 12, 10, 14, 15, 9, 6]
+measurements = [
+    {
+        "day": iso(day),
+        "total": clear + snow_ice,
+        "clear": clear,
+        "snow_ice": snow_ice,
+        "snow_on_ice": snow_on,
+        "bearing": math.floor(clear + snow_ice / 2 + 0.5),
+        "weak": False,
+    }
+    for (day, clear, snow_ice), snow_on in zip(ICE, SNOW_ON_ICE, strict=True)
+]
+yesterday = iso(past[-1])
+
+
+def measurement(key: str, entity: str, unit: str, points: list, average, window: int = 30) -> dict:
+    return {
+        "kind": "measurement",
+        "measurement": key,
+        "station": "Honkavaara" if entity.startswith(SNOW_COURSE) else "Koivujärvi",
+        "entity_id": entity,
+        "average_entity_id": f"{entity}_long_term_average",
+        "unit": unit,
+        "window": window,
+        "average_back": 0,
+        "years": YEARS,
+        "points": points,
+        "average": calendar(average),
+    }
+
+
+LEVEL = f"{STATION}_water_level"
+TEMPERATURE = f"{STATION}_surface_water_temperature"
+BEARS = f"{STATION}_ice_bears"
+SNOW_WATER = f"{SNOW_COURSE}_snow_water_equivalent"
+
+ice = {
+    "kind": "ice",
+    "station": "Koivujärvi",
+    "measures_ice": True,
+    "limits": {"walking": 10, "snowmobile": 15, "car": 20},
+    "max_age": 14,
+    "window": 30,
+    "years": YEARS,
+    "measurements": measurements,
+    "average": calendar(bearing_average),
+    # Each event's average day counts from its season's start: July for a freeze-up, January for a break-up.
+    "events": {
+        "freeze_up": {"day": iso(FREEZE_UP), "average": (FREEZE_UP_AVERAGE - date(2026, 7, 1)).days, "season_start": 7},
+        "permanent_ice": {"day": None, "average": None, "season_start": 7},
+        "open_water_clear": {"day": None, "average": None, "season_start": 1},
+        "break_up": {"day": iso(BREAK_UP), "average": (BREAK_UP_AVERAGE - date(2027, 1, 1)).days, "season_start": 1},
+    },
+}
+
+answers = {
+    LEVEL: measurement("water_level", LEVEL, "m", levels, level_average),
+    TEMPERATURE: measurement("surface_temperature", TEMPERATURE, "°C", temperatures, temperature_average),
+    SNOW_WATER: measurement("snow_water_equivalent", SNOW_WATER, "mm", [[iso(day), value] for day, value in SNOW], snow_average, 60),
+    BEARS: ice,
+}
 
 states = {
-    f"{STATION}_water_level": sensor(
-        levels[-1][1],
-        "Water level",
-        unit_of_measurement="m",
-        device_class="distance",
-        state_class="measurement",
-        measured=yesterday,
-        height_system="N2000",
-    ),
-    f"{STATION}_water_level_long_term_average": sensor(
-        level_average(TODAY), "Water level, long-term average", unit_of_measurement="m", device_class="distance", years=YEARS
-    ),
-    f"{STATION}_surface_water_temperature": sensor(
-        temperatures[-1][1],
-        "Surface water temperature",
-        unit_of_measurement="°C",
-        device_class="temperature",
-        state_class="measurement",
-        measured=yesterday,
-    ),
-    f"{STATION}_surface_water_temperature_long_term_average": sensor(
-        temperature_average(TODAY),
-        "Surface water temperature, long-term average",
-        unit_of_measurement="°C",
-        device_class="temperature",
-        years=YEARS,
-    ),
-    f"{STATION}_ice_thickness": sensor(
-        thickness[-1][1],
-        "Ice thickness",
-        unit_of_measurement="cm",
-        device_class="distance",
-        state_class="measurement",
-        measured=measured_day,
-    ),
-    f"{STATION}_ice_bearing_thickness": sensor(
-        bearing[-1][1],
-        "Ice bearing thickness",
-        unit_of_measurement="cm",
-        device_class="distance",
-        state_class="measurement",
-        measured=measured_day,
-    ),
-    f"{STATION}_ice_bearing_thickness_long_term_average": sensor(
-        bearing_average(TODAY), "Ice bearing thickness, long-term average", unit_of_measurement="cm", device_class="distance", years=YEARS
-    ),
-    f"{STATION}_ice_bears": sensor("car", "Ice bears", device_class="enum", options=["does_not_bear", "walking", "snowmobile", "car"]),
-    f"{STATION}_ice_measured": sensor(measured_day, "Ice measured", device_class="date"),
-    f"{STATION}_freeze_up": sensor(FREEZE_UP.isoformat(), "Freeze-up", device_class="date"),
-    f"{STATION}_freeze_up_long_term_average": sensor(
-        FREEZE_UP_AVERAGE.isoformat(), "Freeze-up, long-term average", device_class="date", years=YEARS
-    ),
-    f"{STATION}_break_up": sensor(BREAK_UP.isoformat(), "Break-up", device_class="date"),
-    f"{STATION}_break_up_long_term_average": sensor(
-        BREAK_UP_AVERAGE.isoformat(), "Break-up, long-term average", device_class="date", years=YEARS
-    ),
-    f"{SNOW_COURSE}_snow_water_equivalent": sensor(
-        snow[-1][1],
-        "",
-        friendly_name="Honkavaara Snow water equivalent",
-        unit_of_measurement="mm",
-        state_class="measurement",
-        measured=SNOW[-1][0].isoformat(),
-    ),
-    f"{SNOW_COURSE}_snow_water_equivalent_long_term_average": sensor(
-        snow_average(TODAY), "", friendly_name="Honkavaara Snow water equivalent, long-term average", unit_of_measurement="mm", years=YEARS
-    ),
+    LEVEL: sensor(levels[-1][1], "Koivujärvi Water level", unit_of_measurement="m", measured=yesterday, height_system="N2000"),
+    TEMPERATURE: sensor(temperatures[-1][1], "Koivujärvi Surface water temperature", unit_of_measurement="°C", measured=yesterday),
+    BEARS: sensor("car", "Koivujärvi Ice bears", device_class="enum", options=["does_not_bear", "walking", "snowmobile", "car"]),
+    SNOW_WATER: sensor(SNOW[-1][1], "Honkavaara Snow water equivalent", unit_of_measurement="mm", measured=iso(SNOW[-1][0])),
 }
 
-statistics = {
-    f"{STATION}_water_level": {"unit": "m", "mean": levels},
-    f"{STATION}_water_level_long_term_average": {"unit": "m", "mean": average_rows(level_average)},
-    f"{STATION}_surface_water_temperature": {"unit": "°C", "mean": temperatures},
-    f"{STATION}_surface_water_temperature_long_term_average": {"unit": "°C", "mean": average_rows(temperature_average)},
-    f"{STATION}_ice_thickness": {"unit": "cm", "mean": thickness},
-    f"{STATION}_ice_bearing_thickness": {"unit": "cm", "mean": bearing},
-    f"{STATION}_ice_bearing_thickness_long_term_average": {"unit": "cm", "mean": average_rows(bearing_average)},
-    f"{SNOW_COURSE}_snow_water_equivalent": {"unit": "mm", "mean": snow},
-    f"{SNOW_COURSE}_snow_water_equivalent_long_term_average": {"unit": "mm", "mean": average_rows(snow_average)},
+
+# The registry gives each sensor its name, without the station's, and the decimals it is shown with.
+# The integration isn't installed in the screenshots' Home Assistant, so the registry entries carry what it would give:
+# the entity's own name from its translations, which the card shows, and its icon from icons.json.
+NAMES = {
+    key: value["name"]
+    for key, value in json.loads(
+        (Path(__file__).parent.parent / "custom_components/syke_hydrology/translations/en.json").read_text(encoding="utf-8")
+    )["entity"]["sensor"].items()
 }
 
-ICE_CHART = chart(
-    "Ice thickness",
-    [
-        measured(f"{STATION}_ice_thickness", "Total", "orange", 0),
-        measured(f"{STATION}_ice_bearing_thickness", "Bearing", "#039be5", 0, 2),
-        *average(f"{STATION}_ice_bearing_thickness_long_term_average", "Bearing, average", "#9e3e3e", 0, 2),
-    ],
-    axis(0, "~30", 2, 0, "cm"),
-    {
-        "yaxis": [
-            {
-                "y": 10,
-                "borderColor": "#039be5",
-                "strokeDashArray": 4,
-                "label": {
-                    "text": "Walking 10 cm",
-                    "position": "right",
-                    "offsetX": -85,
-                    "style": {"color": "white", "background": "#039be5cc"},
-                },
-            }
-        ],
-        "xaxis": [
-            event_line(f"{STATION}_freeze_up", "Freeze-up", "#00acc1", dashed=False),
-            event_line(f"{STATION}_freeze_up_long_term_average", "Freeze-up, average", "#00acc1", dashed=True),
-            event_line(f"{STATION}_break_up", "Break-up", "#43a047", dashed=False),
-            event_line(f"{STATION}_break_up_long_term_average", "Break-up, average", "#43a047", dashed=True),
-            TODAY_LINE,
-        ],
-    },
-)
+
+def entry(key: str, device: str, icon: str, precision: int | None = None) -> dict:
+    found = {"platform": "syke_hydrology", "translation_key": key, "device_id": device, "name": NAMES[key], "icon": icon}
+    return found if precision is None else {**found, "display_precision": precision}
 
 
-def plain_chart(title: str, entity: str, low: float, high: float, decimals: int, unit: str) -> dict:
-    """A measurement and its long-term average."""
-    series = [
-        measured(entity, "Latest", "orange", decimals),
-        *average(f"{entity}_long_term_average", "Long-term average", "#3498db", decimals),
-    ]
-    return chart(title, series, axis(low, high, 3, min(decimals, 1), unit), {"xaxis": [TODAY_LINE]})
+entities = {
+    LEVEL: entry("water_level", "koivujarvi", "mdi:waves-arrow-up", 2),
+    TEMPERATURE: entry("surface_temperature", "koivujarvi", "mdi:thermometer-water", 1),
+    BEARS: entry("ice_bearing_class", "koivujarvi", "mdi:snowflake"),
+    SNOW_WATER: entry("snow_water_equivalent", "honkavaara", "mdi:snowflake-melt", 0),
+}
+devices = {"koivujarvi": {"name": "Koivujärvi"}, "honkavaara": {"name": "Honkavaara"}}
 
 
-view = {
+def card(entity: str, **options) -> dict:
+    return {"type": "custom:syke-hydrology-card", "entity": entity, **options}
+
+
+dashboard = {
     "type": "sections",
     "max_columns": 2,
+    "sections": [
+        {"type": "grid", "cards": [card(BEARS), card(SNOW_WATER)]},
+        {"type": "grid", "cards": [card(LEVEL), card(TEMPERATURE)]},
+    ],
+}
+
+# The forms a card takes when held low: one row, two rows and three.
+rows = {
+    "type": "sections",
+    "max_columns": 1,
     "sections": [
         {
             "type": "grid",
             "cards": [
-                ICE_CHART,
-                tile(f"{STATION}_ice_bears", "Ice bears", "mdi:car", "green"),
-                tile(f"{STATION}_ice_measured", "Ice measured", "mdi:calendar-check", "blue"),
-                plain_chart("Snow water equivalent", f"{SNOW_COURSE}_snow_water_equivalent", 0, 150, 0, "mm"),
+                card(TEMPERATURE, grid_options={"rows": 1}),
+                card(LEVEL, grid_options={"rows": 2}),
+                card(BEARS, grid_options={"rows": 3}),
             ],
-        },
-        {
-            "type": "grid",
-            "cards": [
-                plain_chart("Water level", f"{STATION}_water_level", 81.5, 82.1, 2, "m"),
-                tile(f"{STATION}_freeze_up", "Freeze-up", "mdi:snowflake-thermometer", "cyan"),
-                tile(f"{STATION}_break_up_long_term_average", "Break-up, average", "mdi:calendar-clock", "green"),
-                plain_chart("Surface water temperature", f"{STATION}_surface_water_temperature", 0, 15, 1, "°C"),
-            ],
-        },
+        }
     ],
 }
 
 plan = {
-    "resources": ["https://github.com/RomRider/apexcharts-card/releases/download/v2.2.3/apexcharts-card.js"],
+    "resources": ["custom_components/syke_hydrology/www/syke-hydrology-card.js"],
     "clock": CLOCK.isoformat(),
     "translations": {"syke_hydrology": "custom_components/syke_hydrology/translations"},
-    "entities": {f"{STATION}_ice_bears": {"platform": "syke_hydrology", "translation_key": "ice_bearing_class"}},
+    "entities": entities,
+    "devices": devices,
     "states": states,
-    "statistics": statistics,
-    "shots": [{"name": "dashboard", "width": 1000, "view": view}],
+    "commands": {"syke_hydrology/card": [{"with": {"entity_id": entity}, "result": result} for entity, result in answers.items()]},
+    "shots": [
+        {"name": "dashboard", "width": 1000, "view": dashboard},
+        {"name": "hydrology-measurement", "width": 420, "card": card(LEVEL)},
+        {"name": "hydrology-ice", "width": 420, "card": card(BEARS)},
+        {"name": "hydrology-difference", "width": 420, "card": card(LEVEL, chart="difference")},
+        {"name": "hydrology-rows", "width": 500, "view": rows},
+    ],
 }
 
 Path(__file__).with_name("screenshots.json").write_text(json.dumps(plan, ensure_ascii=False, indent=4) + "\n", encoding="utf-8")
