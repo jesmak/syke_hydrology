@@ -40,7 +40,9 @@ def test_a_place_sharing_its_name_is_told_apart_by_its_id() -> None:
 async def pick(hass: HomeAssistant, quantity: str) -> dict:
     with patch(PLACES_CALL, AsyncMock(return_value=[FAR, NOWHERE, ICE, NEAR])):
         result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
-    return await hass.config_entries.flow.async_configure(result["flow_id"], {"quantity": quantity})
+    assert result["type"] is FlowResultType.MENU
+    assert quantity in result["menu_options"]
+    return await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": quantity})
 
 
 async def test_the_places_of_the_measurement_are_listed_nearest_first(hass: HomeAssistant, enable_custom_integrations) -> None:
@@ -48,16 +50,14 @@ async def test_the_places_of_the_measurement_are_listed_nearest_first(hass: Home
     assert result["step_id"] == "place"
     selector = result["data_schema"].schema["station"].config
     assert selector["custom_value"], "the frontend shows a searchable list only with a custom value"
-    assert selector["options"] == [
-        {"value": "9501", "label": "Esimerkkijärvi, Laituri, Kuopio · 1 km"},
-        {"value": "9502", "label": "Esimerkkijoki, Joensuu · 111 km"},
-        {"value": "9503", "label": "Esimerkkilampi, Kuopio"},
-    ]
+    # The field shows the chosen value, so the value is the text to show.
+    assert selector["options"] == ["Esimerkkijärvi, Laituri, Kuopio · 1 km", "Esimerkkijoki, Joensuu · 111 km", "Esimerkkilampi, Kuopio"]
 
 
 async def add(hass: HomeAssistant, quantity: str, place: Place) -> dict:
     result = await pick(hass, quantity)
-    return await hass.config_entries.flow.async_configure(result["flow_id"], {"station": str(place.id)})
+    chosen = next(option for option in result["data_schema"].schema["station"].config["options"] if option.startswith(place.name))
+    return await hass.config_entries.flow.async_configure(result["flow_id"], {"station": chosen})
 
 
 async def test_the_first_measurement_makes_the_station(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
@@ -92,8 +92,10 @@ async def test_a_second_place_of_a_quantity_is_a_station_of_its_own(hass: HomeAs
     await add(hass, "water_level", NEAR)
     with patch(PLACES_CALL, AsyncMock(return_value=[NEAR, twin])):
         result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"quantity": "water_level"})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"station": "9505"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "water_level"})
+    options = result["data_schema"].schema["station"].config["options"]
+    assert options == [f"{NAME}, Kuopio (9501) · 1 km", f"{NAME}, Kuopio (9505) · 2 km"]
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"station": options[1]})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == f"{NAME} (9505)"
 

@@ -4,8 +4,25 @@
       "user": {
         "title": "Mitä haluat seurata?",
         "description": "Jokainen mittaus lisätään erikseen. Saman aseman mittaukset jakavat aseman laitteen.",
-        "data": {
-          "quantity": "Mittaus"
+        "menu_options": {
+          "water_level": "Vedenkorkeus",
+          "discharge": "Virtaama",
+          "areal_precipitation": "Aluesadanta",
+          "areal_snow": "Lumen aluevesiarvo",
+          "snow_course": "Lumilinja",
+          "ice": "Jään paksuus",
+          "ice_events": "Jäätyminen ja jäänlähtö",
+          "surface_temperature": "Pintaveden lämpötila"
+        },
+        "menu_option_descriptions": {
+          "water_level": "Kuinka korkealla järven tai joen vedenpinta on, yleensä metreinä merenpinnasta N2000-korkeusjärjestelmässä.",
+          "discharge": "Kuinka paljon vettä joessa virtaa, kuutiometreinä sekunnissa (m³/s).",
+          "areal_precipitation": "Kuinka paljon koko valuma-alueella on satanut viidessä päivässä ja kuukaudessa, millimetreinä (mm).",
+          "areal_snow": "Kuinka paljon vettä lumessa on koko valuma-alueella, millimetreinä vettä (mm).",
+          "snow_course": "Kuinka paljon vettä lumessa on, maastossa samalta linjalta mitattuna, millimetreinä vettä (mm).",
+          "ice": "Kuinka paksua jää on kairauspaikalla, senttimetreinä (cm), ja mitä se kantaa.",
+          "ice_events": "Päivämäärät, joina vesi jäätyi ja jäät lähtivät.",
+          "surface_temperature": "Kuinka lämmintä vesi on lähellä pintaa, celsiusasteina (°C)."
         }
       },
       "place": {

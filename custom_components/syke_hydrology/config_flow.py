@@ -16,7 +16,6 @@ from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
-    SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
@@ -65,48 +64,34 @@ class SykeHydrologyConfigFlow(ConfigFlow, domain=DOMAIN):
         self._quantity: Quantity | None = None
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        if user_input is not None:
-            self._quantity = Quantity[user_input[CONF_QUANTITY].upper()]
-            return await self.async_step_place()
-        if not self._places:
-            try:
-                self._places = await SykeClient(async_get_clientsession(self.hass)).async_places()
-            except SykeError:
-                return self.async_abort(reason="cannot_connect")
-        options = [quantity.name.lower() for quantity in Quantity]
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_QUANTITY): SelectSelector(
-                        SelectSelectorConfig(options=options, translation_key=CONF_QUANTITY, mode=SelectSelectorMode.LIST)
-                    )
-                }
-            ),
-        )
+        try:
+            self._places = await SykeClient(async_get_clientsession(self.hass)).async_places()
+        except SykeError:
+            return self.async_abort(reason="cannot_connect")
+        # A menu, as its choices can have a description each, which the options of a list can't.
+        return self.async_show_menu(step_id="user", menu_options=[quantity.name.lower() for quantity in Quantity])
 
     async def async_step_place(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         places = [place for place in self._places if place.quantity == self._quantity]
+        distances = {place.id: distance_km(self.hass, place) for place in places}
+        named = Counter((place.name, place.municipality) for place in places)
+        labels = {place.id: label(place, named[place.name, place.municipality] > 1, distances[place.id]) for place in places}
         errors: dict[str, str] = {}
         if user_input is not None:
             # The list takes typed text too, so a place is only one of its own.
-            place = next((place for place in places if str(place.id) == user_input[CONF_STATION]), None)
+            place = next((place for place in places if labels[place.id] == user_input[CONF_STATION]), None)
             if place is None:
                 errors[CONF_STATION] = "unknown_station"
             else:
                 return await self._async_add(place)
 
-        distances = {place.id: distance_km(self.hass, place) for place in places}
         # Nearest first, the places whose distance isn't known last.
         places.sort(key=lambda place: (distances[place.id] is None, distances[place.id] or 0.0, place.name))
-        named = Counter((place.name, place.municipality) for place in places)
-        options = [
-            SelectOptionDict(value=str(place.id), label=label(place, named[place.name, place.municipality] > 1, distances[place.id]))
-            for place in places
-        ]
+        # A custom value makes the frontend show a list that can be searched, which a thousand water levels need. With
+        # it the field shows the chosen value and not its label, so the value is the label.
+        options = [labels[place.id] for place in places]
         return self.async_show_form(
             step_id="place",
-            # A custom value makes the frontend show a list that can be searched, which a thousand water levels need.
             data_schema=vol.Schema(
                 {vol.Required(CONF_STATION): SelectSelector(SelectSelectorConfig(options=options, custom_value=True, sort=False))}
             ),
@@ -138,6 +123,14 @@ class SykeHydrologyConfigFlow(ConfigFlow, domain=DOMAIN):
         )
         return self.async_create_entry(title=f"{place.name} ({place.id})" if twin else place.name, data={CONF_PLACES: [added]})
 
+    @staticmethod
+    def _quantity_step(quantity: Quantity) -> Any:
+        async def step(self: SykeHydrologyConfigFlow, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+            self._quantity = quantity
+            return await self.async_step_place()
+
+        return step
+
     @classmethod
     @callback
     def async_supports_options_flow(cls, config_entry: ConfigEntry) -> bool:
@@ -148,6 +141,11 @@ class SykeHydrologyConfigFlow(ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> StationOptionsFlow:
         return StationOptionsFlow()
+
+
+# The menu's choice is the name of the step it goes to, so each quantity has a step that goes on to its stations.
+for _quantity in Quantity:
+    setattr(SykeHydrologyConfigFlow, f"async_step_{_quantity.name.lower()}", SykeHydrologyConfigFlow._quantity_step(_quantity))
 
 
 def centimetres() -> NumberSelector:

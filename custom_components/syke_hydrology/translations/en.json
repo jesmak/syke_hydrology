@@ -4,8 +4,25 @@
       "user": {
         "title": "What do you want to follow?",
         "description": "Each measurement is added on its own. The measurements of one station share its device.",
-        "data": {
-          "quantity": "Measurement"
+        "menu_options": {
+          "water_level": "Water level",
+          "discharge": "Discharge",
+          "areal_precipitation": "Areal precipitation",
+          "areal_snow": "Areal snow water equivalent",
+          "snow_course": "Snow course",
+          "ice": "Ice thickness",
+          "ice_events": "Freeze-up and break-up",
+          "surface_temperature": "Surface water temperature"
+        },
+        "menu_option_descriptions": {
+          "water_level": "How high the water of a lake or a river is, usually in metres above sea level in the N2000 height system.",
+          "discharge": "How much water flows in a river, in cubic metres per second (m³/s).",
+          "areal_precipitation": "How much it has rained over a whole catchment area in five days and in a month, in millimetres (mm).",
+          "areal_snow": "How much water there is in the snow over a whole catchment area, in millimetres of water (mm).",
+          "snow_course": "How much water there is in the snow, measured on the ground along a fixed course, in millimetres of water (mm).",
+          "ice": "How thick the ice is where it is drilled, in centimetres (cm), and how much it bears.",
+          "ice_events": "The dates the water froze over and the ice went.",
+          "surface_temperature": "How warm the water is near the surface, in degrees Celsius (°C)."
         }
       },
       "place": {
