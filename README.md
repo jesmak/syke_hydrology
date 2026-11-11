@@ -255,9 +255,8 @@ The measurements come from Syke's open
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The source is the Finnish Environment Institute (Syke),
 and every sensor carries the attribution.
 
-The integration's icon is Syke's logo, which belongs to Syke.
-
-This integration is unofficial and not affiliated with or endorsed by Syke.
+This is an unofficial integration. It isn't made, endorsed or supported by Syke, and is not affiliated with it. The
+icon is Syke's logo, which belongs to Syke and is used only to show where the data comes from.
 
 ## Translating
 
