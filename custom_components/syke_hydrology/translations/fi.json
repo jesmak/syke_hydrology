@@ -1,0 +1,339 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mitä haluat seurata?",
+        "description": "Jokainen mittaus lisätään erikseen. Saman aseman mittaukset jakavat aseman laitteen.",
+        "data": {
+          "quantity": "Mittaus"
+        }
+      },
+      "place": {
+        "title": "Valitse asema",
+        "data": {
+          "station": "Asema"
+        },
+        "data_description": {
+          "station": "Lähin ensin. Hae järven, joen, kylän tai kunnan nimellä."
+        }
+      }
+    },
+    "error": {
+      "unknown_station": "Valitse asema listalta."
+    },
+    "abort": {
+      "already_configured": "Tämä asema on jo lisätty.",
+      "cannot_connect": "Syken palveluun ei saatu yhteyttä. Yritä hetken päästä uudelleen.",
+      "measurement_added": "Mittaus lisättiin asemalle {station}."
+    }
+  },
+  "selector": {
+    "quantity": {
+      "options": {
+        "water_level": "Vedenkorkeus",
+        "discharge": "Virtaama",
+        "areal_precipitation": "Aluesadanta",
+        "areal_snow": "Lumen aluevesiarvo",
+        "snow_course": "Lumilinja",
+        "ice": "Jään paksuus",
+        "ice_events": "Jäätyminen ja jäänlähtö",
+        "surface_temperature": "Pintaveden lämpötila"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aseman asetukset",
+        "menu_options": {
+          "limits": "Jään kantavuuden rajat",
+          "measurements": "Mittaukset"
+        }
+      },
+      "limits": {
+        "title": "Jään kantavuus",
+        "description": "Kantava paksuus on teräsjää ja puolet kohvajäästä. Rajat ovat nyrkkisääntöjä eivätkä takuu. Jää vaihtelee paikasta toiseen, eikä yksi mittaus kerro mitään virtapaikoista tai railoista.",
+        "data": {
+          "walking": "Kantaa jalankulkijan",
+          "snowmobile": "Kantaa moottorikelkan",
+          "car": "Kantaa auton",
+          "max_age": "Mittaus on vanha"
+        },
+        "data_description": {
+          "max_age": "Montako vuorokautta viimeisimmästä jäämittauksesta, ennen kuin se merkitään vanhaksi."
+        }
+      },
+      "measurements": {
+        "title": "Mittaukset",
+        "description": "Tällä asemalla seurattavat mittaukset. Mittaus, jonka valinnan poistat, poistetaan antureineen. Uusia lisätään integraation sivulta kohdasta Lisää merkintä.",
+        "data": {
+          "measurements": "Mittaukset"
+        }
+      }
+    },
+    "error": {
+      "limits_order": "Kunkin rajan on oltava vähintään yhtä paksu kuin sen yläpuolella olevan.",
+      "keep_one": "Jätä ainakin yksi mittaus. Koko asema poistetaan integraation sivulta."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ice_measurement_old": {
+        "name": "Jäämittaus vanha"
+      }
+    },
+    "sensor": {
+      "water_level": {
+        "name": "Vedenkorkeus",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          },
+          "height_system": {
+            "name": "Korkeusjärjestelmä"
+          }
+        }
+      },
+      "discharge": {
+        "name": "Virtaama",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "surface_temperature": {
+        "name": "Pintaveden lämpötila",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "precipitation_5_days": {
+        "name": "Sadanta, 5 vrk",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "precipitation_month": {
+        "name": "Sadanta, kuukausi",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "areal_snow_water_equivalent": {
+        "name": "Lumen aluevesiarvo",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "snow_water_equivalent": {
+        "name": "Lumen vesiarvo",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "ice_thickness": {
+        "name": "Jään paksuus",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "clear_ice_thickness": {
+        "name": "Teräsjään paksuus",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "snow_ice_thickness": {
+        "name": "Kohvajään paksuus",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "snow_on_ice": {
+        "name": "Lunta jäällä",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "ice_bearing": {
+        "name": "Jään kantava paksuus",
+        "state_attributes": {
+          "measured": {
+            "name": "Mitattu"
+          }
+        }
+      },
+      "ice_bearing_class": {
+        "name": "Jää kantaa",
+        "state": {
+          "does_not_bear": "Ei kanna",
+          "walking": "Jalankulkijan",
+          "snowmobile": "Moottorikelkan",
+          "car": "Auton"
+        }
+      },
+      "ice_measured": {
+        "name": "Jää mitattu"
+      },
+      "freeze_up": {
+        "name": "Jäätyminen"
+      },
+      "permanent_ice": {
+        "name": "Pysyvä jääpeite"
+      },
+      "open_water_clear": {
+        "name": "Jäät lähteneet selkävesiltä"
+      },
+      "break_up": {
+        "name": "Jäänlähtö"
+      },
+      "water_level_average": {
+        "name": "Vedenkorkeus, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "discharge_average": {
+        "name": "Virtaama, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "surface_temperature_average": {
+        "name": "Pintaveden lämpötila, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "precipitation_5_days_average": {
+        "name": "Sadanta, 5 vrk, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "precipitation_month_average": {
+        "name": "Sadanta, kuukausi, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "areal_snow_water_equivalent_average": {
+        "name": "Lumen aluevesiarvo, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "snow_water_equivalent_average": {
+        "name": "Lumen vesiarvo, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "ice_thickness_average": {
+        "name": "Jään paksuus, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "clear_ice_thickness_average": {
+        "name": "Teräsjään paksuus, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "snow_ice_thickness_average": {
+        "name": "Kohvajään paksuus, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "snow_on_ice_average": {
+        "name": "Lunta jäällä, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "ice_bearing_average": {
+        "name": "Jään kantava paksuus, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "freeze_up_average": {
+        "name": "Jäätyminen, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "permanent_ice_average": {
+        "name": "Pysyvä jääpeite, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "open_water_clear_average": {
+        "name": "Jäät lähteneet selkävesiltä, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      },
+      "break_up_average": {
+        "name": "Jäänlähtö, pitkän aikavälin keskiarvo",
+        "state_attributes": {
+          "years": {
+            "name": "Vuodet"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "ice_measurement_old": {
+        "default": "mdi:calendar-check",
+        "state": {
+          "on": "mdi:calendar-alert"
+        }
+      }
+    },
+    "sensor": {
+      "water_level": {
+        "default": "mdi:waves-arrow-up"
+      },
+      "discharge": {
+        "default": "mdi:waves-arrow-right"
+      },
+      "surface_temperature": {
+        "default": "mdi:thermometer-water"
+      },
+      "precipitation_5_days": {
+        "default": "mdi:weather-pouring"
+      },
+      "precipitation_month": {
+        "default": "mdi:weather-pouring"
+      },
+      "areal_snow_water_equivalent": {
+        "default": "mdi:snowflake-melt"
+      },
+      "snow_water_equivalent": {
+        "default": "mdi:snowflake-melt"
+      },
+      "ice_thickness": {
+        "default": "mdi:snowflake"
+      },
+      "clear_ice_thickness": {
+        "default": "mdi:snowflake"
+      },
+      "snow_ice_thickness": {
+        "default": "mdi:snowflake"
+      },
+      "snow_on_ice": {
+        "default": "mdi:snowflake-variant"
+      },
+      "ice_bearing": {
+        "default": "mdi:arrow-collapse-down"
+      },
+      "ice_bearing_class": {
+        "default": "mdi:help-circle-outline",
+        "state": {
+          "does_not_bear": "mdi:water",
+          "walking": "mdi:walk",
+          "snowmobile": "mdi:snowmobile",
+          "car": "mdi:car"
+        }
+      },
+      "ice_measured": {
+        "default": "mdi:calendar-check"
+      },
+      "freeze_up": {
+        "default": "mdi:snowflake-thermometer"
+      },
+      "permanent_ice": {
+        "default": "mdi:snowflake-thermometer"
+      },
+      "open_water_clear": {
+        "default": "mdi:sun-snowflake-variant"
+      },
+      "break_up": {
+        "default": "mdi:sun-snowflake-variant"
+      },
+      "water_level_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "discharge_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "surface_temperature_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "precipitation_5_days_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "precipitation_month_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "areal_snow_water_equivalent_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "snow_water_equivalent_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "ice_thickness_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "clear_ice_thickness_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "snow_ice_thickness_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "snow_on_ice_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "ice_bearing_average": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "freeze_up_average": {
+        "default": "mdi:calendar-clock"
+      },
+      "permanent_ice_average": {
+        "default": "mdi:calendar-clock"
+      },
+      "open_water_clear_average": {
+        "default": "mdi:calendar-clock"
+      },
+      "break_up_average": {
+        "default": "mdi:calendar-clock"
+      }
+    }
+  }
+}

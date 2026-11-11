@@ -1,0 +1,18 @@
+{
+  "domain": "syke_hydrology",
+  "name": "SYKE hydrology",
+  "after_dependencies": [
+    "recorder"
+  ],
+  "categories": ["weather_alerts"],
+  "codeowners": [
+    "@jesmak"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/jesmak/syke_hydrology",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/jesmak/syke_hydrology/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

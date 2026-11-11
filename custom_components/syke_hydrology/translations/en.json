@@ -1,0 +1,339 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "What do you want to follow?",
+        "description": "Each measurement is added on its own. The measurements of one station share its device.",
+        "data": {
+          "quantity": "Measurement"
+        }
+      },
+      "place": {
+        "title": "Pick a station",
+        "data": {
+          "station": "Station"
+        },
+        "data_description": {
+          "station": "The nearest first. Search by a lake, a river, a village or a municipality."
+        }
+      }
+    },
+    "error": {
+      "unknown_station": "Pick a station from the list."
+    },
+    "abort": {
+      "already_configured": "This station has already been added.",
+      "cannot_connect": "Syke's service could not be reached. Try again in a while.",
+      "measurement_added": "The measurement was added to {station}."
+    }
+  },
+  "selector": {
+    "quantity": {
+      "options": {
+        "water_level": "Water level",
+        "discharge": "Discharge",
+        "areal_precipitation": "Areal precipitation",
+        "areal_snow": "Areal snow water equivalent",
+        "snow_course": "Snow course",
+        "ice": "Ice thickness",
+        "ice_events": "Freeze-up and break-up",
+        "surface_temperature": "Surface water temperature"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Station settings",
+        "menu_options": {
+          "limits": "Ice bearing limits",
+          "measurements": "Measurements"
+        }
+      },
+      "limits": {
+        "title": "Ice bearing",
+        "description": "The ice bearing thickness is the clear ice and half of the snow ice. These limits are rules of thumb, not a guarantee. Ice varies from place to place, and one measurement says nothing about currents or cracks.",
+        "data": {
+          "walking": "Bears a person walking",
+          "snowmobile": "Bears a snowmobile",
+          "car": "Bears a car",
+          "max_age": "Measurement is old after"
+        },
+        "data_description": {
+          "max_age": "Days after which the last ice measurement is marked as old."
+        }
+      },
+      "measurements": {
+        "title": "Measurements",
+        "description": "The measurements followed at this station. One you untick is removed with its sensors. New ones are added with Add entry on the integration's page.",
+        "data": {
+          "measurements": "Measurements"
+        }
+      }
+    },
+    "error": {
+      "limits_order": "Each limit must be at least as thick as the one above it.",
+      "keep_one": "Keep at least one measurement. The whole station is removed on the integration's page."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ice_measurement_old": {
+        "name": "Ice measurement old"
+      }
+    },
+    "sensor": {
+      "water_level": {
+        "name": "Water level",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          },
+          "height_system": {
+            "name": "Height system"
+          }
+        }
+      },
+      "discharge": {
+        "name": "Discharge",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "surface_temperature": {
+        "name": "Surface water temperature",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "precipitation_5_days": {
+        "name": "Precipitation, 5 days",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "precipitation_month": {
+        "name": "Precipitation, month",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "areal_snow_water_equivalent": {
+        "name": "Areal snow water equivalent",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "snow_water_equivalent": {
+        "name": "Snow water equivalent",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "ice_thickness": {
+        "name": "Ice thickness",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "clear_ice_thickness": {
+        "name": "Clear ice thickness",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "snow_ice_thickness": {
+        "name": "Snow ice thickness",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "snow_on_ice": {
+        "name": "Snow on ice",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "ice_bearing": {
+        "name": "Ice bearing thickness",
+        "state_attributes": {
+          "measured": {
+            "name": "Measured"
+          }
+        }
+      },
+      "ice_bearing_class": {
+        "name": "Ice bears",
+        "state": {
+          "does_not_bear": "Does not bear",
+          "walking": "A person walking",
+          "snowmobile": "A snowmobile",
+          "car": "A car"
+        }
+      },
+      "ice_measured": {
+        "name": "Ice measured"
+      },
+      "freeze_up": {
+        "name": "Freeze-up"
+      },
+      "permanent_ice": {
+        "name": "Permanent ice cover"
+      },
+      "open_water_clear": {
+        "name": "Ice gone from open water"
+      },
+      "break_up": {
+        "name": "Break-up"
+      },
+      "water_level_average": {
+        "name": "Water level, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "discharge_average": {
+        "name": "Discharge, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "surface_temperature_average": {
+        "name": "Surface water temperature, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "precipitation_5_days_average": {
+        "name": "Precipitation, 5 days, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "precipitation_month_average": {
+        "name": "Precipitation, month, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "areal_snow_water_equivalent_average": {
+        "name": "Areal snow water equivalent, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "snow_water_equivalent_average": {
+        "name": "Snow water equivalent, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "ice_thickness_average": {
+        "name": "Ice thickness, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "clear_ice_thickness_average": {
+        "name": "Clear ice thickness, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "snow_ice_thickness_average": {
+        "name": "Snow ice thickness, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "snow_on_ice_average": {
+        "name": "Snow on ice, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "ice_bearing_average": {
+        "name": "Ice bearing thickness, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "freeze_up_average": {
+        "name": "Freeze-up, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "permanent_ice_average": {
+        "name": "Permanent ice cover, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "open_water_clear_average": {
+        "name": "Ice gone from open water, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      },
+      "break_up_average": {
+        "name": "Break-up, long-term average",
+        "state_attributes": {
+          "years": {
+            "name": "Years"
+          }
+        }
+      }
+    }
+  }
+}

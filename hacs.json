@@ -1,0 +1,8 @@
+{
+  "name": "SYKE hydrology",
+  "render_readme": true,
+  "zip_release": true,
+  "filename": "syke_hydrology.zip",
+  "country": "FI",
+  "homeassistant": "2026.9.3"
+}
