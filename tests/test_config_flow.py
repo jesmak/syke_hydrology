@@ -45,7 +45,7 @@ async def pick(hass: HomeAssistant, quantity: str) -> dict:
     return await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": quantity})
 
 
-async def test_the_places_of_the_measurement_are_listed_nearest_first(hass: HomeAssistant, enable_custom_integrations) -> None:
+async def test_the_places_of_the_measurement_are_listed_nearest_first(hass: HomeAssistant) -> None:
     result = await pick(hass, "water_level")
     assert result["step_id"] == "place"
     selector = result["data_schema"].schema["station"].config
@@ -60,7 +60,7 @@ async def add(hass: HomeAssistant, quantity: str, place: Place) -> dict:
     return await hass.config_entries.flow.async_configure(result["flow_id"], {"station": chosen})
 
 
-async def test_the_first_measurement_makes_the_station(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_the_first_measurement_makes_the_station(hass: HomeAssistant, syke) -> None:
     result = await add(hass, "ice", ICE)
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == NAME
@@ -68,7 +68,7 @@ async def test_the_first_measurement_makes_the_station(hass: HomeAssistant, enab
     assert result["data"][CONF_PLACES] == [{"id": 9504, "quantity": 9, "name": NAME, "municipality": "Kuopio"}]
 
 
-async def test_another_measurement_joins_its_station(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_another_measurement_joins_its_station(hass: HomeAssistant, syke) -> None:
     entry = (await add(hass, "ice", ICE))["result"]
     result = await add(hass, "water_level", NEAR)
     assert result["type"] is FlowResultType.ABORT
@@ -80,14 +80,14 @@ async def test_another_measurement_joins_its_station(hass: HomeAssistant, enable
     assert hass.states.get("sensor.esimerkkijarvi_laituri_water_level") is not None, "the station was reloaded"
 
 
-async def test_a_measurement_is_added_once(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_a_measurement_is_added_once(hass: HomeAssistant, syke) -> None:
     await add(hass, "water_level", NEAR)
     result = await add(hass, "water_level", NEAR)
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "already_configured"
 
 
-async def test_a_second_place_of_a_quantity_is_a_station_of_its_own(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_a_second_place_of_a_quantity_is_a_station_of_its_own(hass: HomeAssistant, syke) -> None:
     twin = Place(9505, Quantity.WATER_LEVEL, NEAR.name, NEAR.municipality, 62.91, 27.68)
     await add(hass, "water_level", NEAR)
     with patch(PLACES_CALL, AsyncMock(return_value=[NEAR, twin])):
@@ -100,14 +100,14 @@ async def test_a_second_place_of_a_quantity_is_a_station_of_its_own(hass: HomeAs
     assert result["title"] == f"{NAME} (9505)"
 
 
-async def test_typed_text_is_not_a_station(hass: HomeAssistant, enable_custom_integrations) -> None:
+async def test_typed_text_is_not_a_station(hass: HomeAssistant) -> None:
     result = await pick(hass, "water_level")
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"station": "Esimerkkijärvi"})
     assert result["step_id"] == "place"
     assert result["errors"] == {"station": "unknown_station"}
 
 
-async def test_an_unreachable_syke_ends_the_flow(hass: HomeAssistant, enable_custom_integrations) -> None:
+async def test_an_unreachable_syke_ends_the_flow(hass: HomeAssistant) -> None:
     with patch(PLACES_CALL, AsyncMock(side_effect=SykeError("down"))):
         result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result["type"] is FlowResultType.ABORT
@@ -120,7 +120,7 @@ async def test_a_station_has_options_when_it_has_several_measurements_or_ice(has
     assert not station_entry(hass, [PLACES[0]]).supports_options
 
 
-async def test_a_measurement_left_out_is_removed_with_its_sensors(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_a_measurement_left_out_is_removed_with_its_sensors(hass: HomeAssistant, syke) -> None:
     entry = station_entry(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
@@ -144,7 +144,7 @@ async def test_a_measurement_left_out_is_removed_with_its_sensors(hass: HomeAssi
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 
-async def test_the_limits_must_grow(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_the_limits_must_grow(hass: HomeAssistant, syke) -> None:
     entry = station_entry(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     result = await hass.config_entries.options.async_init(entry.entry_id)

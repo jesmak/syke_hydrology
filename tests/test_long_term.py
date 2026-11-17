@@ -51,7 +51,7 @@ def reads(syke) -> int:
     return sum(1 for call in syke.async_rows.call_args_list if call.args[1] == date(1997, 1, 1))
 
 
-async def test_a_sensor_has_the_average_of_its_calendar_day(hass: HomeAssistant, enable_custom_integrations, syke, history) -> None:
+async def test_a_sensor_has_the_average_of_its_calendar_day(hass: HomeAssistant, syke, history) -> None:
     await set_up(hass)
     level = hass.states.get(f"{PREFIX}_water_level_long_term_average")
     # 311.5 cm on average over 1997–2026, at 75.00 m.
@@ -62,14 +62,14 @@ async def test_a_sensor_has_the_average_of_its_calendar_day(hass: HomeAssistant,
     assert hass.states.get(f"{PREFIX}_freeze_up_long_term_average").state == "2026-12-12"
 
 
-async def test_what_has_too_few_years_has_no_average_sensor(hass: HomeAssistant, enable_custom_integrations, syke, history) -> None:
+async def test_what_has_too_few_years_has_no_average_sensor(hass: HomeAssistant, syke, history) -> None:
     await set_up(hass)
     registry = er.async_get(hass)
     assert registry.async_get(f"{PREFIX}_surface_water_temperature_long_term_average") is None
     assert registry.async_get(f"{PREFIX}_break_up_long_term_average") is None
 
 
-async def test_the_averages_are_kept_over_a_restart(hass: HomeAssistant, enable_custom_integrations, syke, history) -> None:
+async def test_the_averages_are_kept_over_a_restart(hass: HomeAssistant, syke, history) -> None:
     entry = await set_up(hass)
     assert reads(syke) == 4, "each of the four places once"
     assert await hass.config_entries.async_reload(entry.entry_id)
@@ -79,7 +79,7 @@ async def test_the_averages_are_kept_over_a_restart(hass: HomeAssistant, enable_
 
 
 async def test_the_averages_are_read_again_when_the_year_changes(
-    hass: HomeAssistant, enable_custom_integrations, syke, history, freezer: FrozenDateTimeFactory
+    hass: HomeAssistant, syke, history, freezer: FrozenDateTimeFactory
 ) -> None:
     entry = await set_up(hass)
     freezer.move_to(noon(date(2028, 2, 10)))
@@ -93,7 +93,7 @@ async def test_the_averages_are_read_again_when_the_year_changes(
 
 
 async def test_averages_that_cannot_be_read_again_stay_until_they_can(
-    hass: HomeAssistant, enable_custom_integrations, syke, history, freezer: FrozenDateTimeFactory
+    hass: HomeAssistant, syke, history, freezer: FrozenDateTimeFactory
 ) -> None:
     entry = await set_up(hass)
     freezer.move_to(noon(date(2028, 2, 10)))
@@ -115,7 +115,7 @@ async def test_averages_that_cannot_be_read_again_stay_until_they_can(
     assert hass.states.get(f"{PREFIX}_water_level_long_term_average").attributes["years"] == "1998–2027"
 
 
-async def test_the_average_gets_its_past_year_too(recorder_mock, enable_custom_integrations, hass: HomeAssistant, syke, history) -> None:
+async def test_the_average_gets_its_past_year_too(recorder_mock, hass: HomeAssistant, syke, history) -> None:
     await set_up(hass)
     rows = await stored(hass, f"{PREFIX}_water_level_long_term_average")
     # Only the 9th and the 10th of February have an average, and today is the 10th.
@@ -123,9 +123,7 @@ async def test_the_average_gets_its_past_year_too(recorder_mock, enable_custom_i
     assert rows == [(midnight(day), 78.115) for day in days]
 
 
-async def test_the_averages_are_read_again_when_the_measurements_change(
-    hass: HomeAssistant, enable_custom_integrations, syke, history
-) -> None:
+async def test_the_averages_are_read_again_when_the_measurements_change(hass: HomeAssistant, syke, history) -> None:
     entry = await set_up(hass)
     assert reads(syke) == 4
     hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_PLACES: entry.data[CONF_PLACES][:2]})
@@ -134,7 +132,7 @@ async def test_the_averages_are_read_again_when_the_measurements_change(
     assert reads(syke) == 6, "the two places left"
 
 
-async def test_the_averages_go_with_the_station(hass: HomeAssistant, enable_custom_integrations, syke, history, hass_storage) -> None:
+async def test_the_averages_go_with_the_station(hass: HomeAssistant, syke, history, hass_storage) -> None:
     entry = await set_up(hass)
     key = f"syke_hydrology.averages.{entry.entry_id}"
     await hass.async_block_till_done()
@@ -144,7 +142,7 @@ async def test_the_averages_go_with_the_station(hass: HomeAssistant, enable_cust
     assert await Store(hass, 1, key).async_load() is None
 
 
-async def test_averages_computed_another_way_are_read_again(hass: HomeAssistant, enable_custom_integrations, syke, history) -> None:
+async def test_averages_computed_another_way_are_read_again(hass: HomeAssistant, syke, history) -> None:
     entry = await set_up(hass)
     with patch("custom_components.syke_hydrology.long_term.RULES", 99):
         assert await hass.config_entries.async_reload(entry.entry_id)

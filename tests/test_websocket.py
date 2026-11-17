@@ -50,7 +50,7 @@ async def ask(hass: HomeAssistant, client, entity_id: str) -> dict:
     return await client.receive_json()
 
 
-async def test_a_measurement_comes_with_its_days_and_averages(hass: HomeAssistant, hass_ws_client, enable_custom_integrations, syke):
+async def test_a_measurement_comes_with_its_days_and_averages(hass: HomeAssistant, hass_ws_client, syke):
     await set_up(hass)
     client = await hass_ws_client(hass)
     for entity_id in (f"{PREFIX}_water_level", f"{PREFIX}_water_level_long_term_average"):
@@ -71,7 +71,7 @@ async def test_a_measurement_comes_with_its_days_and_averages(hass: HomeAssistan
         }
 
 
-async def test_a_measurement_is_in_the_unit_its_sensor_is_shown_in(hass: HomeAssistant, hass_ws_client, enable_custom_integrations, syke):
+async def test_a_measurement_is_in_the_unit_its_sensor_is_shown_in(hass: HomeAssistant, hass_ws_client, syke):
     await set_up(hass)
     er.async_get(hass).async_update_entity_options(f"{PREFIX}_water_level", "sensor", {"unit_of_measurement": "cm"})
     await hass.async_block_till_done()
@@ -81,7 +81,7 @@ async def test_a_measurement_is_in_the_unit_its_sensor_is_shown_in(hass: HomeAss
     assert result["average"]["02-09"] == pytest.approx(7805.0)
 
 
-async def test_any_ice_sensor_comes_with_the_stations_ice(hass: HomeAssistant, hass_ws_client, enable_custom_integrations, syke):
+async def test_any_ice_sensor_comes_with_the_stations_ice(hass: HomeAssistant, hass_ws_client, syke):
     syke.rows[9102] = [*syke.rows[9102], Row(date(2027, 2, 9), 0.0, 43)]
     await set_up(hass, options={CONF_WALKING: 8, CONF_CAR: 25})
     client = await hass_ws_client(hass)
@@ -113,14 +113,14 @@ async def test_any_ice_sensor_comes_with_the_stations_ice(hass: HomeAssistant, h
 
 
 @pytest.mark.parametrize("entity_id", ["sensor.not_ours", "binary_sensor.esimerkkijarvi_laituri_nothing"])
-async def test_a_sensor_not_of_a_station_is_refused(hass: HomeAssistant, hass_ws_client, enable_custom_integrations, syke, entity_id):
+async def test_a_sensor_not_of_a_station_is_refused(hass: HomeAssistant, hass_ws_client, syke, entity_id):
     await set_up(hass)
     response = await ask(hass, await hass_ws_client(hass), entity_id)
     assert not response["success"]
     assert response["error"]["code"] == "not_found"
 
 
-async def test_a_station_not_loaded_is_tried_again(hass: HomeAssistant, hass_ws_client, enable_custom_integrations, syke):
+async def test_a_station_not_loaded_is_tried_again(hass: HomeAssistant, hass_ws_client, syke):
     await set_up(hass)
     entry = hass.config_entries.async_entries("syke_hydrology")[0]
     await hass.config_entries.async_unload(entry.entry_id)

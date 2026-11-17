@@ -11,7 +11,7 @@ from homeassistant.components.recorder.statistics import async_import_statistics
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
-from pytest_homeassistant_custom_component.components.recorder.common import async_wait_recording_done
+from pytest_homeassistant.components.recorder.common import async_wait_recording_done
 
 from .conftest import TODAY, station_entry
 
@@ -46,7 +46,7 @@ async def set_up(hass: HomeAssistant) -> None:
 
 
 async def test_a_new_sensor_gets_each_day_it_would_have_shown(
-    recorder_mock, enable_custom_integrations, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
+    recorder_mock, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
 ) -> None:
     await at_noon(hass, freezer)
     await set_up(hass)
@@ -64,7 +64,7 @@ async def test_a_new_sensor_gets_each_day_it_would_have_shown(
 
 
 async def test_hours_kept_while_the_day_before_was_shown_are_given_the_days_own_value(
-    recorder_mock, enable_custom_integrations, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
+    recorder_mock, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
 ) -> None:
     await at_noon(hass, freezer)
     # The recorder kept the 8th's level through the 9th, as the 9th's was published only today.
@@ -88,7 +88,7 @@ async def test_hours_kept_while_the_day_before_was_shown_are_given_the_days_own_
 
 
 async def test_a_sensor_renamed_onto_older_statistics_corrects_them_after_a_reload(
-    recorder_mock, enable_custom_integrations, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
+    recorder_mock, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
 ) -> None:
     await at_noon(hass, freezer)
     # The statistics of the sensor the integration replaces, which kept the measurement before through the 1st.
@@ -121,7 +121,7 @@ async def test_a_sensor_renamed_onto_older_statistics_corrects_them_after_a_relo
 
 
 async def test_nothing_is_written_into_hours_the_recorder_has_not_compiled(
-    recorder_mock, enable_custom_integrations, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
+    recorder_mock, hass: HomeAssistant, syke, freezer: FrozenDateTimeFactory
 ) -> None:
     await hass.config.async_set_time_zone("Europe/Helsinki")
     # An hour into the day: a row at its midnight would collide with the recorder compiling that hour.

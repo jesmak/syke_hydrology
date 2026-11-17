@@ -30,7 +30,7 @@ async def set_up(hass: HomeAssistant, **kwargs) -> None:
     await hass.async_block_till_done()
 
 
-async def test_the_station_shows_its_newest_measurements(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_the_station_shows_its_newest_measurements(hass: HomeAssistant, syke) -> None:
     await set_up(hass)
     level = hass.states.get(f"{PREFIX}_water_level")
     assert level.state == "78.12"
@@ -52,13 +52,13 @@ async def test_the_station_shows_its_newest_measurements(hass: HomeAssistant, en
     assert hass.states.get("binary_sensor.esimerkkijarvi_laituri_ice_measurement_old").state == "off"
 
 
-async def test_the_limits_and_the_maximum_age_are_the_stations_own(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_the_limits_and_the_maximum_age_are_the_stations_own(hass: HomeAssistant, syke) -> None:
     await set_up(hass, options={CONF_WALKING: 10, CONF_SNOWMOBILE: 26, CONF_CAR: 40, CONF_MAX_AGE: 7})
     assert hass.states.get(f"{PREFIX}_ice_bears").state == "snowmobile"
     assert hass.states.get("binary_sensor.esimerkkijarvi_laituri_ice_measurement_old").state == "on", "nine days old"
 
 
-async def test_a_measurement_older_than_its_window_is_unavailable(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_a_measurement_older_than_its_window_is_unavailable(hass: HomeAssistant, syke) -> None:
     syke.rows[9102] = [Row(date(2027, 1, 5), 20.0, 113), Row(date(2027, 1, 5), 20.0, 41)]
     await set_up(hass)
     assert hass.states.get(f"{PREFIX}_ice_thickness").state == STATE_UNAVAILABLE
@@ -67,7 +67,7 @@ async def test_a_measurement_older_than_its_window_is_unavailable(hass: HomeAssi
     assert hass.states.get("binary_sensor.esimerkkijarvi_laituri_ice_measurement_old").state == "on"
 
 
-async def test_weak_ice_bears_nothing(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_weak_ice_bears_nothing(hass: HomeAssistant, syke) -> None:
     syke.rows[9102] = [*syke.rows[9102], Row(date(2027, 2, 9), 0.0, 43)]
     await set_up(hass)
     assert hass.states.get(f"{PREFIX}_ice_thickness").state == "unknown"
@@ -75,7 +75,7 @@ async def test_weak_ice_bears_nothing(hass: HomeAssistant, enable_custom_integra
     assert hass.states.get(f"{PREFIX}_ice_bears").state == "does_not_bear"
 
 
-async def test_a_water_level_without_a_height_system_is_in_centimetres(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_a_water_level_without_a_height_system_is_in_centimetres(hass: HomeAssistant, syke) -> None:
     syke.level = None
     await set_up(hass)
     level = hass.states.get(f"{PREFIX}_water_level")
@@ -84,7 +84,7 @@ async def test_a_water_level_without_a_height_system_is_in_centimetres(hass: Hom
     assert level.attributes["height_system"] is None
 
 
-async def test_a_station_has_only_the_sensors_of_its_quantities(hass: HomeAssistant, enable_custom_integrations, syke) -> None:
+async def test_a_station_has_only_the_sensors_of_its_quantities(hass: HomeAssistant, syke) -> None:
     await set_up(hass, places=[Place(9101, Quantity.WATER_LEVEL, "Esimerkkijärvi, Laituri", "Kuopio")])
     assert hass.states.async_entity_ids("sensor") == [f"{PREFIX}_water_level"]
     assert hass.states.async_entity_ids("binary_sensor") == []
