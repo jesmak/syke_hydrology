@@ -37,8 +37,8 @@ average one.
 
 ### With the Marketplace
 
-1. Open Settings › Marketplace, choose Add from link and paste `https://github.com/jesmak/syke_hydrology`
-2. Open SYKE hydrology in the Marketplace and choose Install
+1. Open Settings › Marketplace and search for SYKE hydrology
+2. Open it and choose Install
 3. Restart Home Assistant
 4. Add the integration in Settings › Devices & services, and choose a measurement and a station
 
@@ -385,6 +385,6 @@ MIT, see [LICENSE](LICENSE). The data is Syke's, see [Data](#data).
 [release-date-shield]: https://img.shields.io/github/release-date/jesmak/syke_hydrology?style=for-the-badge
 [releases]: https://github.com/jesmak/syke_hydrology/releases
 [downloads-shield]: https://img.shields.io/github/downloads/jesmak/syke_hydrology/total.svg?style=for-the-badge
-[marketplace-shield]: https://img.shields.io/badge/Marketplace-Custom-orange.svg?style=for-the-badge
+[marketplace-shield]: https://img.shields.io/badge/Marketplace-Default-green.svg?style=for-the-badge
 [marketplace]: https://my.home-assistant.io/redirect/marketplace_repository/?owner=jesmak&repository=syke_hydrology&category=integration
 [license-shield]: https://img.shields.io/github/license/jesmak/syke_hydrology.svg?style=for-the-badge
