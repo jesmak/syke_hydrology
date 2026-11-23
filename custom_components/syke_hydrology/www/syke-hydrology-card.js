@@ -1316,6 +1316,7 @@ var MEASUREMENT_CHART = 150;
 var DIFFERENCE_CHART = 110;
 var ICE_CHART = 135;
 var MIN_CHART = 90;
+var CHART_GAP_PX = 20;
 var SPARK_CHART = 56;
 var MIN_HEIGHT = 56;
 var ICON_ROOM = 13;
@@ -1351,6 +1352,7 @@ var SykeHydrologyCard = class extends i4 {
     super(...arguments);
     this.form = 0;
     this.chartHeight = 0;
+    this.gap = 0;
     this.width = 0;
     this.filled = 0;
     this.spare = 0;
@@ -1450,7 +1452,7 @@ var SykeHydrologyCard = class extends i4 {
       this.resizes?.observe(card);
       this.observed = card;
     }
-    if (![...changed.keys()].every((key) => ["filled", "spare", "chartHeight", "held", "pointed"].includes(String(key)))) {
+    if (![...changed.keys()].every((key) => ["filled", "spare", "chartHeight", "gap", "held", "pointed"].includes(String(key)))) {
       this.measureSoon();
     }
   }
@@ -1546,7 +1548,17 @@ var SykeHydrologyCard = class extends i4 {
       }
     }
     this.form = chosen;
-    this.chartHeight = chart;
+    this.grow(forms[chosen], chart);
+  }
+  /**
+   * Gives the chart `chart` pixels, of which what it has over its own height first widens its gaps to the header and
+   * the foot, by up to `CHART_GAP_PX` each, as a chart stretched close to them looks cramped. The chart takes the rest.
+   */
+  grow(form, chart) {
+    const over = form.chart ? chart - form.chart : 0;
+    const gap = Math.min(CHART_GAP_PX, Math.max(0, Math.floor(over / 2)));
+    this.gap = gap;
+    this.chartHeight = chart - 2 * gap;
   }
   /**
    * The height the card is held to, or undefined on automatic rows. A card growing up to a limit is held only once its
@@ -1601,18 +1613,18 @@ var SykeHydrologyCard = class extends i4 {
     if (!limit) {
       this.filled = 0;
       this.spare = 0;
-      this.chartHeight = form.chart ?? 0;
+      this.grow(form, form.chart ?? 0);
       return;
     }
     const last = inner.lastElementChild;
     if (!last) {
       return;
     }
-    const content = (last.getBoundingClientRect().bottom - card.getBoundingClientRect().top) / drawnScale(card) + px(getComputedStyle(inner).paddingBottom) + px(getComputedStyle(card).borderBottomWidth) - Math.max(0, this.chartHeight - (form.chart ?? 0));
+    const content = (last.getBoundingClientRect().bottom - card.getBoundingClientRect().top) / drawnScale(card) + px(getComputedStyle(inner).paddingBottom) + px(getComputedStyle(card).borderBottomWidth) - Math.max(0, this.chartHeight - (form.chart ?? 0)) - 2 * this.gap;
     const filled = filledHeight(content, this.config ?? {}, limit);
     this.filled = filled;
     this.spare = spareRoom(filled, content);
-    this.chartHeight = (form.chart ?? 0) + (form.chart ? this.spare : 0);
+    this.grow(form, (form.chart ?? 0) + (form.chart ? this.spare : 0));
   }
   /** Whether the card is held to a height, so its texts keep to one line. */
   isHeld() {
@@ -1623,10 +1635,9 @@ var SykeHydrologyCard = class extends i4 {
     return heightMode(this.config ?? {}) === "max" && heightStyle(this.config ?? {}, this.layout, MIN_HEIGHT).startsWith("max-height");
   }
   cardStyle() {
-    if (this.held) {
-      return `height: ${this.held}px`;
-    }
-    return filledStyle(this.config ?? {}, this.layout, MIN_HEIGHT, this.filled);
+    const gap = this.gap ? `--syke-gap: ${this.gap}px` : "";
+    const style = this.held ? `height: ${this.held}px` : filledStyle(this.config ?? {}, this.layout, MIN_HEIGHT, this.filled);
+    return [style, gap].filter(Boolean).join("; ");
   }
   // ---- The forms ----
   forms(data) {
@@ -2298,9 +2309,10 @@ var SykeHydrologyCard = class extends i4 {
                 --mdc-icon-size: 14px;
             }
 
+            /* The gaps above the chart and the foot grow by --syke-gap with a chart given more than its own height. */
             .chart-room {
                 position: relative;
-                margin-top: 10px;
+                margin-top: calc(10px + var(--syke-gap, 0px));
                 flex: none;
             }
             svg {
@@ -2460,7 +2472,7 @@ var SykeHydrologyCard = class extends i4 {
                 gap: 2px 14px;
                 font-size: 12px;
                 color: var(--secondary-text-color);
-                margin-top: 6px;
+                margin-top: calc(6px + var(--syke-gap, 0px));
                 line-height: 17px;
             }
             .held .foot {
@@ -2679,6 +2691,9 @@ __decorateClass([
 __decorateClass([
   r5()
 ], SykeHydrologyCard.prototype, "chartHeight", 2);
+__decorateClass([
+  r5()
+], SykeHydrologyCard.prototype, "gap", 2);
 __decorateClass([
   r5()
 ], SykeHydrologyCard.prototype, "width", 2);

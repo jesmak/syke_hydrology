@@ -249,6 +249,8 @@ it.
 
 In a sections view the card is the section's full width by default, and can be made as narrow as 6 columns. On
 automatic rows it ends on whole rows, or on half rows with `row_step: half`, and the chart takes the room left over.
+Room the chart gets beyond its own height first widens its gaps to the header and the legend, by up to 20 px each, and
+the chart grows by the rest. The same goes for a card held taller than its content.
 
 Held lower than its content needs, by rows set in the layout tab or by `height_mode`, the card draws less instead of
 cutting anything off. The chart shrinks first, down to 90 px, then the legend under it goes. Lower still, a measurement

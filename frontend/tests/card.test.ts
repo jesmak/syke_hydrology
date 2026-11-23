@@ -238,3 +238,23 @@ describe("pointing at a chart", () => {
         expect(stepDay("2026-11-01", -1, frame)).toBe("2026-11-01");
     });
 });
+
+describe("the chart's gaps", () => {
+    // A chart of 150 px given more first widens its gaps to the header and the foot, up to 20 px each, then grows itself.
+    it.each([
+        ["its own height, with nothing over", { chart: 150 }, 150, 0, 150],
+        ["40 px over, all to the gaps", { chart: 150 }, 190, 20, 150],
+        ["21 px over, the odd pixel to the chart", { chart: 150 }, 171, 10, 151],
+        ["104 px over, the rest to the chart", { chart: 150 }, 254, 20, 214],
+        ["less than its own height, held low", { chart: 150 }, 120, 0, 120],
+        ["no chart at all", {}, 0, 0, 0],
+    ])("given %s", async (_name, form, chart, gap, height) => {
+        const element = (await card("sensor.vedenkorkeus", new Error("not needed"))) as unknown as {
+            grow(form: object, chart: number): void;
+            gap: number;
+            chartHeight: number;
+        };
+        element.grow(form, chart);
+        expect([element.gap, element.chartHeight]).toEqual([gap, height]);
+    });
+});

@@ -39,6 +39,8 @@ const MEASUREMENT_CHART = 150;
 const DIFFERENCE_CHART = 110;
 const ICE_CHART = 135;
 const MIN_CHART = 90;
+/** The most each of the chart's gaps, to the header and to the foot, grows before the chart grows past its own height. */
+const CHART_GAP_PX = 20;
 /** The sparkline under the row in two rows: 120 px less the row, the padding, the border and the gap above it. */
 const SPARK_CHART = 56;
 /** The one-row form: a 36 px row with 9 px of padding and ha-card's 1 px border above and below. */
@@ -108,6 +110,8 @@ export class SykeHydrologyCard extends LitElement {
     /** The form drawn, by its place in `forms()`, and its chart's height. */
     @state() private form = 0;
     @state() private chartHeight = 0;
+    /** What the chart's gaps above and below it have grown by, each, before the chart grows. */
+    @state() private gap = 0;
     /** The content's width, which the charts are drawn for. */
     @state() private width = 0;
     /** On automatic rows, the height that fills the card's rows and the room that leaves for the chart. */
@@ -236,7 +240,7 @@ export class SykeHydrologyCard extends LitElement {
             this.resizes?.observe(card);
             this.observed = card;
         }
-        if (![...changed.keys()].every((key) => ["filled", "spare", "chartHeight", "held", "pointed"].includes(String(key)))) {
+        if (![...changed.keys()].every((key) => ["filled", "spare", "chartHeight", "gap", "held", "pointed"].includes(String(key)))) {
             this.measureSoon();
         }
     }
@@ -339,7 +343,18 @@ export class SykeHydrologyCard extends LitElement {
             }
         }
         this.form = chosen;
-        this.chartHeight = chart;
+        this.grow(forms[chosen], chart);
+    }
+
+    /**
+     * Gives the chart `chart` pixels, of which what it has over its own height first widens its gaps to the header and
+     * the foot, by up to `CHART_GAP_PX` each, as a chart stretched close to them looks cramped. The chart takes the rest.
+     */
+    private grow(form: Form, chart: number): void {
+        const over = form.chart ? chart - form.chart : 0;
+        const gap = Math.min(CHART_GAP_PX, Math.max(0, Math.floor(over / 2)));
+        this.gap = gap;
+        this.chartHeight = chart - 2 * gap;
     }
 
     /**
@@ -398,23 +413,25 @@ export class SykeHydrologyCard extends LitElement {
         if (!limit) {
             this.filled = 0;
             this.spare = 0;
-            this.chartHeight = form.chart ?? 0;
+            this.grow(form, form.chart ?? 0);
             return;
         }
         const last = inner.lastElementChild;
         if (!last) {
             return;
         }
-        // From the card's top to the end of its own last part, less the room the chart was given, as drawn now.
+        // From the card's top to the end of its own last part, less the room the chart and its gaps were given, as drawn
+        // now.
         const content =
             (last.getBoundingClientRect().bottom - card.getBoundingClientRect().top) / drawnScale(card) +
             px(getComputedStyle(inner).paddingBottom) +
             px(getComputedStyle(card).borderBottomWidth) -
-            Math.max(0, this.chartHeight - (form.chart ?? 0));
+            Math.max(0, this.chartHeight - (form.chart ?? 0)) -
+            2 * this.gap;
         const filled = filledHeight(content, this.config ?? {}, limit);
         this.filled = filled;
         this.spare = spareRoom(filled, content);
-        this.chartHeight = (form.chart ?? 0) + (form.chart ? this.spare : 0);
+        this.grow(form, (form.chart ?? 0) + (form.chart ? this.spare : 0));
     }
 
     /** Whether the card is held to a height, so its texts keep to one line. */
@@ -428,10 +445,9 @@ export class SykeHydrologyCard extends LitElement {
     }
 
     private cardStyle(): string {
-        if (this.held) {
-            return `height: ${this.held}px`;
-        }
-        return filledStyle(this.config ?? {}, this.layout, MIN_HEIGHT, this.filled);
+        const gap = this.gap ? `--syke-gap: ${this.gap}px` : "";
+        const style = this.held ? `height: ${this.held}px` : filledStyle(this.config ?? {}, this.layout, MIN_HEIGHT, this.filled);
+        return [style, gap].filter(Boolean).join("; ");
     }
 
     // ---- The forms ----
@@ -1214,9 +1230,10 @@ export class SykeHydrologyCard extends LitElement {
                 --mdc-icon-size: 14px;
             }
 
+            /* The gaps above the chart and the foot grow by --syke-gap with a chart given more than its own height. */
             .chart-room {
                 position: relative;
-                margin-top: 10px;
+                margin-top: calc(10px + var(--syke-gap, 0px));
                 flex: none;
             }
             svg {
@@ -1376,7 +1393,7 @@ export class SykeHydrologyCard extends LitElement {
                 gap: 2px 14px;
                 font-size: 12px;
                 color: var(--secondary-text-color);
-                margin-top: 6px;
+                margin-top: calc(6px + var(--syke-gap, 0px));
                 line-height: 17px;
             }
             .held .foot {
